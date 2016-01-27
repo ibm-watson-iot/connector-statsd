@@ -1,2 +1,3 @@
-# IoTF StatsD Connector
+# Watson IoT StatsD Connector
 
+Very much a work in progress ...
