@@ -95,7 +95,7 @@ class Server():
 			# Convert boolean datapoints to numeric 0|1 representation
 			# Throw away everything else (e.g. String data)
 			if isinstance(datapoint[1], bool):
-				if datapoint[1] == true:
+				if datapoint[1] == True:
 					self.statsd.gauge(eventNamespace + "." + datapoint[0], 1)
 				else:
 					self.statsd.gauge(eventNamespace + "." + datapoint[0], 0)
