@@ -30,7 +30,7 @@ RUN git clone https://github.com/etsy/statsd.git /src/statsd &&\
 # =============================================================================
 # Install IoTF Connector for StatsD
 # =============================================================================
-ADD connector/connector-statsd.py /opt/connector-statsd/connector-statsd.py
+ADD connector /opt/connector-statsd/
 
 
 # =============================================================================
