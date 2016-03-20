@@ -39,12 +39,12 @@ class Server():
 	def __init__(self, args):
 		# Setup logging - Generate a default rotating file log handler and stream handler
 		logFileName = 'connector-statsd.log'
-		fhFormatter = logging.Formatter('%(asctime)-25s %(name)-30s ' + ' %(levelname)-7s %(message)s')
-		rfh = RotatingFileHandler(logFileName, mode='a', maxBytes=26214400 , backupCount=2, encoding=None, delay=True)
-		rfh.setFormatter(fhFormatter)
+		fhFormatter = logging.Formatter('%(asctime)-25s %(levelname)-7s %(message)s')
+		sh = logging.StreamHandler()
+		sh.setFormatter(fhFormatter)
 		
 		self.logger = logging.getLogger("server")
-		self.logger.addHandler(rfh)
+		self.logger.addHandler(sh)
 		self.logger.setLevel(logging.DEBUG)
 		
 		
@@ -52,41 +52,38 @@ class Server():
 		self.host = str(os.getenv('VCAP_APP_HOST', 'localhost'))
 
 		if args.bluemix == True:
-			# Bluemix VCAP lookups
-			application = json.loads(os.getenv('VCAP_APPLICATION'))
-			service = json.loads(os.getenv('VCAP_SERVICES'))
-			
-			# IoTF
 			self.options = ibmiotf.application.ParseConfigFromBluemixVCAP()
 		else:
-			self.options = ibmiotf.application.ParseConfigFile(args.config)
-		
-		
-		self.dbName = self.options['org'] + "-events"
+			if args.token is not None:
+				self.options = {'auth-token': args.token, 'auth-key': args.key}
+			else:
+				self.options = ibmiotf.application.ParseConfigFile(args.config)
 		
 		# Bottle
 		self._app = Bottle()
 		self._route()
 		
-		# Init statsd client
-		self.statsdHost = "localhost"
-		self.statsd = StatsClient(self.statsdHost, prefix=self.options['org'])
-		
 		# Init IOTF client
-		self.client = ibmiotf.application.Client(self.options, logHandlers=[rfh])
+		self.client = ibmiotf.application.Client(self.options, logHandlers=[sh])
 	
+		# Init statsd client
+		if args.statsd:
+			self.statsdHost = args.statsd
+		else: 
+			self.statsdHost = "localhost"
+		
+		self.statsd = StatsClient(self.statsdHost, prefix=self.client.orgId)
+		
 	
 	def _route(self):
 		self._app.route('/', method="GET", callback=self._status)
 	
 	
 	def myEventCallback(self, evt):
-		#self.logger.info("%-33s%-30s%s" % (evt.timestamp.isoformat(), evt.device, evt.event + ": " + json.dumps(evt.data)))
-		#self.logger.info(evt.data)
-		
 		flatData = flattenDict(evt.data, join=lambda a,b:a+'.'+b)
 		
-		print(flatData)
+		self.logger.debug("%-30s%s" % (evt.device, evt.event + ": " + json.dumps(flatData)))
+		
 		eventNamespace = evt.deviceType +  "." + evt.deviceId + "." + evt.event
 		
 		self.statsd.incr(eventNamespace)
@@ -121,6 +118,9 @@ class Server():
 parser = argparse.ArgumentParser()
 parser.add_argument('-b', '--bluemix', required=False, action='store_true')
 parser.add_argument('-c', '--config', required=False)
+parser.add_argument('-k', '--key', required=False)
+parser.add_argument('-t', '--token', required=False)
+parser.add_argument('-s', '--statsd', required=False)
 
 args, unknown = parser.parse_known_args()
 
