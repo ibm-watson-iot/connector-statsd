@@ -86,18 +86,19 @@ class Server():
 		
 		eventNamespace = evt.deviceType +  "." + evt.deviceId + "." + evt.event
 		
-		self.statsd.incr(eventNamespace)
+		self.statsd.incr("events.meta." + eventNamespace)
 		for datapoint in flatData:
+			eventDataNamespace = "events.data." + eventNamespace + "." + datapoint[0]
 			# Pass through numeric data
 			# Convert boolean datapoints to numeric 0|1 representation
 			# Throw away everything else (e.g. String data)
 			if isinstance(datapoint[1], bool):
 				if datapoint[1] == True:
-					self.statsd.gauge(eventNamespace + "." + datapoint[0], 1)
+					self.statsd.gauge(eventDataNamespace, 1)
 				else:
-					self.statsd.gauge(eventNamespace + "." + datapoint[0], 0)
+					self.statsd.gauge(eventDataNamespace, 0)
 			elif isinstance(datapoint[1], Number):
-				self.statsd.gauge(eventNamespace + "." + datapoint[0], datapoint[1])
+				self.statsd.gauge(eventDataNamespace, datapoint[1])
 	
 	def start(self):
 		self.client.connect()
