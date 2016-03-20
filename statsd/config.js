@@ -9,7 +9,7 @@
 		graphiteHost: process.env.GRAPHITE_HOST || "127.0.0.1",
 		flushInterval: 10000,
 
-		prefixStats: "iotf",
+		prefixStats: "statsd",
 
 		backends: ['./backends/graphite'],
 		graphite: {
