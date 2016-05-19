@@ -80,26 +80,30 @@ class Server():
 	
 	
 	def myEventCallback(self, evt):
-		flatData = flattenDict(evt.data, join=lambda a,b:a+'.'+b)
-		
-		self.logger.debug("%-30s%s" % (evt.device, evt.event + ": " + json.dumps(flatData)))
-		
-		eventNamespace = evt.deviceType +  "." + evt.deviceId + "." + evt.event
-		
-		self.statsd.incr("events.meta." + eventNamespace)
-		for datapoint in flatData:
-			eventDataNamespace = "events.data." + eventNamespace + "." + datapoint[0]
-			# Pass through numeric data
-			# Convert boolean datapoints to numeric 0|1 representation
-			# Throw away everything else (e.g. String data)
-			if isinstance(datapoint[1], bool):
-				if datapoint[1] == True:
-					self.statsd.gauge(eventDataNamespace, 1)
-				else:
-					self.statsd.gauge(eventDataNamespace, 0)
-			elif isinstance(datapoint[1], Number):
-				self.statsd.gauge(eventDataNamespace, datapoint[1])
-	
+		try:
+			flatData = flattenDict(evt.data, join=lambda a,b:a+'.'+b)
+			
+			self.logger.debug("%-30s%s" % (evt.device, evt.event + ": " + json.dumps(flatData)))
+			
+			eventNamespace = evt.deviceType +  "." + evt.deviceId + "." + evt.event
+			
+			self.statsd.incr("events.meta." + eventNamespace)
+			for datapoint in flatData:
+				eventDataNamespace = "events.data." + eventNamespace + "." + datapoint[0]
+				# Pass through numeric data
+				# Convert boolean datapoints to numeric 0|1 representation
+				# Throw away everything else (e.g. String data)
+				if isinstance(datapoint[1], bool):
+					if datapoint[1] == True:
+						self.statsd.gauge(eventDataNamespace, 1)
+					else:
+						self.statsd.gauge(eventDataNamespace, 0)
+				elif isinstance(datapoint[1], Number):
+					self.statsd.gauge(eventDataNamespace, datapoint[1])
+		except Exception as e:
+			self.logger.critical("%-30s%s" % (evt.device, evt.event + ": Exception processing event - " + str(e)))
+			#self.logger.critical(json.dumps(evt.data))
+
 	def start(self):
 		self.client.connect()
 		self.client.deviceEventCallback = self.myEventCallback

@@ -11,7 +11,7 @@ RUN apt-get -y install git wget curl nano supervisor build-essential python-pip 
 # =============================================================================
 # Watson IoT Statsd Connector module dependencies
 # =============================================================================
-RUN pip install ibmiotf statsd bottle
+RUN pip install ibmiotf==0.2.3 statsd bottle
 
 # =============================================================================
 # Install NodeJS for statsd
