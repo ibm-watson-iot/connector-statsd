@@ -72,7 +72,7 @@ class Server():
 		else: 
 			self.statsdHost = "localhost"
 		
-		self.statsd = StatsClient(self.statsdHost, prefix=self.client.orgId)
+		self.statsd = StatsClient(self.statsdHost, prefix="wiotp." + self.client.orgId)
 		
 	
 	def _route(self):
