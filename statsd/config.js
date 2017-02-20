@@ -7,7 +7,7 @@
 
 		graphitePort: parseInt(process.env.GRAPHITE_PORT) || 2003,
 		graphiteHost: process.env.GRAPHITE_HOST || "127.0.0.1",
-		flushInterval: 10000,
+		flushInterval: 60000,
 
 		prefixStats: "statsd",
 
@@ -22,6 +22,6 @@
 
 		deleteIdleStats: true,
 
-		dumpMessages: true
+		dumpMessages: false
     };
 })()
