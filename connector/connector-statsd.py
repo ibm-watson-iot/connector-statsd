@@ -51,14 +51,11 @@ class Server():
 		self.port = int(os.getenv('VCAP_APP_PORT', '9666'))
 		self.host = str(os.getenv('VCAP_APP_HOST', 'localhost'))
 
-		if args.bluemix == True:
-			self.options = ibmiotf.application.ParseConfigFromBluemixVCAP()
+		if args.token is not None:
+			self.options = {'auth-token': args.token, 'auth-key': args.key}
 		else:
-			if args.token is not None:
-				self.options = {'auth-token': args.token, 'auth-key': args.key}
-			else:
-				self.options = ibmiotf.application.ParseConfigFile(args.config)
-		
+			self.options = ibmiotf.application.ParseConfigFile(args.config)
+	
 		# Bottle
 		self._app = Bottle()
 		self._route()
@@ -121,7 +118,6 @@ class Server():
 
 # Initialize the properties we need
 parser = argparse.ArgumentParser()
-parser.add_argument('-b', '--bluemix', required=False, action='store_true')
 parser.add_argument('-c', '--config', required=False)
 parser.add_argument('-k', '--key', required=False)
 parser.add_argument('-t', '--token', required=False)

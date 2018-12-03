@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 # Dependencies
 # =============================================================================
 RUN apt-get -y update && \
-    apt-get -y install git wget curl nano supervisor build-essential python-pip python-dev zip zlib1g-dev libssl-dev
+    apt-get -y install sudo git wget curl nano supervisor build-essential python-pip python-dev zip zlib1g-dev libssl-dev
 
 # =============================================================================
 # Install updated version of Python
@@ -34,7 +34,8 @@ RUN pip2.7 install ibmiotf==0.2.3 statsd bottle
 # =============================================================================
 # Install NodeJS for statsd
 # =============================================================================
-RUN apt-get install -y nodejs
+RUN curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash - && \
+    apt-get install -y nodejs
 
 
 # =============================================================================
