@@ -12,7 +12,7 @@ RUN apt-get -y update && \
 # =============================================================================
 # Watson IoT Statsd Connector module dependencies
 # =============================================================================
-RUN pip install ibmiotf==0.2.3 statsd bottle
+RUN pip install ibmiotf==0.4.0 statsd bottle
 
 # =============================================================================
 # Install NodeJS for statsd
